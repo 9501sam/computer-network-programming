@@ -1,15 +1,21 @@
 CC = gcc
-CFLAGS = -Wall -std=c99
+CFLAGS = -Wall
 
-TARGET = server client
+TARGET = selectserver client
 
 ALL: $(TARGET)
 
-server: selectserver.c
+selectserver: selectserver.c
 	$(CC) -o $@ $^ $(CFLAGS)
 
 client: client.c
 	$(CC) -o $@ $^ $(CFLAGS)
+
+ser: selectserver
+	./selectserver
+
+cli: client
+	./client 127.0.0.1 12345
 
 clean:
 	$(RM) $(TARGET)
