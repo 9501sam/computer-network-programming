@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+
+#define PORT "9034"
+
+void *get_in_addri(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET)
+        return &(((struct sockaddr_in *)sa)->sin_addr);
+    return &(((struct sockaddr_in6 *)sa)->sin6_addr);
+}
+
+int main(int argc, char **argv)
+{
+    fd_set master;
+    fd_set read_fds;
+    int fdmax;
+
+    int listener;
+    int newfd;
+    struct sockaddr_storage remoteaddr;
+    socklen_t addrlen;
+
+    char buf[256];
+    int nbytes;
+
+    char remoteIP[INET6_ADDRSTRLEN];
+
+    int yes = 1;
+    int i, j, rv;
+
+    struct addrinfo hints, *ai, *p;
+
+    FD_ZERO(&master);
+    FD_ZERO(&read_fds);
+
+    // get us a socket and bind it
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_UNSPEC;
+
+    return 0;
+}
