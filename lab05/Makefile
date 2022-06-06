@@ -15,7 +15,7 @@ ser: server
 	./server 51717
 
 cli: client
-	./client 127.0.0.1 51717
+	./client localhost 51717
 
 clean:
 	$(RM) $(TARGET)

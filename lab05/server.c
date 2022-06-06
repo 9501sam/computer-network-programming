@@ -14,15 +14,16 @@
 
 void str_echo(int sockfd)
 {
-    int n;
-    char buf[MAXLINE];
-again:
-    while ( (n = read(sockfd, buf, MAXLINE)))
-        write(sockfd, buf, n);
-    if (n < 0 && errno == EINTR)
-        goto again;
-    else if (n < 0)
-        printf("str_echo: read error");
+    while (1) {
+        char buf[MAXLINE];
+        time_t rawtime;
+        struct tm *timeinfo;
+        time(&rawtime);
+        timeinfo = localtime(&rawtime);
+        sprintf(buf, "%s", asctime(timeinfo));
+        write(sockfd, buf, strlen(buf));
+        sleep(1);
+    }
 }
 
 void sig_chld(int signo)
@@ -30,7 +31,7 @@ void sig_chld(int signo)
     pid_t pid;
     int stat;
     while ((pid = waitpid(-1, &stat, WNOHANG)) > 0)
-        printf("child %d terminated\n", pid);// printf() isn't suitable for use here
+        printf("child %d terminated\n", pid);
     return;
 }
 
@@ -52,11 +53,11 @@ int main(int argc, char **argv)
     servaddr.sin_port = htons(portno);
     bind(listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
     listen(listenfd, 5);
-    while (1) {
-        if (signal(SIGCHLD, sig_chld) == SIG_ERR) {
-            fprintf(stderr, "can't catch SIGCHLD \n");
-            exit(0);
-        }
+    if (signal(SIGCHLD, sig_chld) == SIG_ERR) {
+        fprintf(stderr, "can't catch SIGCHLD \n");
+        exit(0);
+    }
+    for (;;) {
         clilen = sizeof(cliaddr);
         if ((connfd = accept(listenfd, (struct sockaddr *) &cliaddr, &clilen)) < 0) {
             if (errno == EINTR) {
@@ -69,18 +70,7 @@ int main(int argc, char **argv)
 
         if ((childpid = fork()) == 0) { // child
             close(listenfd); // close listening socket
-            while (1) {
-                char buf[MAXLINE];
-                time_t rawtime;
-                struct tm *timeinfo;
-                time(&rawtime);
-                timeinfo = localtime(&rawtime);
-
-                sprintf(buf, "%s", asctime(timeinfo));
-                write(connfd, buf, strlen(buf));
-                sleep(1);
-            }
-            close(connfd);
+            str_echo(connfd);
             exit(0);
         }
         close(connfd); // parent closes connected socket
